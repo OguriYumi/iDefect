@@ -171,7 +171,7 @@
             gro_overlap.Controls.Add(label9);
             gro_overlap.Location = new Point(39, 211);
             gro_overlap.Name = "gro_overlap";
-            gro_overlap.Size = new Size(790, 60);
+            gro_overlap.Size = new Size(780, 60);
             gro_overlap.TabIndex = 4;
             gro_overlap.TabStop = false;
             gro_overlap.Text = "重複判定";
@@ -322,7 +322,7 @@
             gro_out.Controls.Add(label3);
             gro_out.Location = new Point(39, 390);
             gro_out.Name = "gro_out";
-            gro_out.Size = new Size(790, 100);
+            gro_out.Size = new Size(780, 100);
             gro_out.TabIndex = 18;
             gro_out.TabStop = false;
             gro_out.Text = "出力加工";
@@ -331,7 +331,7 @@
             // 
             label23.AutoSize = true;
             label23.Font = new Font("Yu Gothic UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            label23.Location = new Point(757, 71);
+            label23.Location = new Point(742, 71);
             label23.Margin = new Padding(4, 0, 4, 0);
             label23.Name = "label23";
             label23.Size = new Size(27, 15);
@@ -342,7 +342,7 @@
             // 
             label24.AutoSize = true;
             label24.Font = new Font("Yu Gothic UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            label24.Location = new Point(757, 36);
+            label24.Location = new Point(742, 36);
             label24.Margin = new Padding(4, 0, 4, 0);
             label24.Name = "label24";
             label24.Size = new Size(27, 15);
@@ -353,7 +353,7 @@
             // 
             label22.AutoSize = true;
             label22.Font = new Font("Yu Gothic UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            label22.Location = new Point(525, 71);
+            label22.Location = new Point(510, 71);
             label22.Margin = new Padding(4, 0, 4, 0);
             label22.Name = "label22";
             label22.Size = new Size(27, 15);
@@ -364,7 +364,7 @@
             // 
             label21.AutoSize = true;
             label21.Font = new Font("Yu Gothic UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            label21.Location = new Point(525, 36);
+            label21.Location = new Point(510, 36);
             label21.Margin = new Padding(4, 0, 4, 0);
             label21.Name = "label21";
             label21.Size = new Size(27, 15);
@@ -406,7 +406,7 @@
             // 
             // txtYlimitEnd
             // 
-            txtYlimitEnd.Location = new Point(707, 63);
+            txtYlimitEnd.Location = new Point(692, 63);
             txtYlimitEnd.MaxLength = 4;
             txtYlimitEnd.Name = "txtYlimitEnd";
             txtYlimitEnd.Size = new Size(50, 29);
@@ -417,7 +417,7 @@
             // label15
             // 
             label15.AutoSize = true;
-            label15.Location = new Point(563, 66);
+            label15.Location = new Point(548, 66);
             label15.Margin = new Padding(4, 0, 4, 0);
             label15.Name = "label15";
             label15.Size = new Size(147, 21);
@@ -426,7 +426,7 @@
             // 
             // txtXlimitEnd
             // 
-            txtXlimitEnd.Location = new Point(707, 28);
+            txtXlimitEnd.Location = new Point(692, 28);
             txtXlimitEnd.MaxLength = 5;
             txtXlimitEnd.Name = "txtXlimitEnd";
             txtXlimitEnd.Size = new Size(50, 29);
@@ -437,7 +437,7 @@
             // label16
             // 
             label16.AutoSize = true;
-            label16.Location = new Point(563, 31);
+            label16.Location = new Point(548, 31);
             label16.Margin = new Padding(4, 0, 4, 0);
             label16.Name = "label16";
             label16.Size = new Size(147, 21);
@@ -446,7 +446,7 @@
             // 
             // txtYlimitStart
             // 
-            txtYlimitStart.Location = new Point(474, 63);
+            txtYlimitStart.Location = new Point(459, 63);
             txtYlimitStart.MaxLength = 4;
             txtYlimitStart.Name = "txtYlimitStart";
             txtYlimitStart.Size = new Size(50, 29);
@@ -457,7 +457,7 @@
             // label11
             // 
             label11.AutoSize = true;
-            label11.Location = new Point(330, 66);
+            label11.Location = new Point(315, 66);
             label11.Margin = new Padding(4, 0, 4, 0);
             label11.Name = "label11";
             label11.Size = new Size(147, 21);
@@ -466,7 +466,7 @@
             // 
             // txtXlimitStart
             // 
-            txtXlimitStart.Location = new Point(474, 28);
+            txtXlimitStart.Location = new Point(459, 28);
             txtXlimitStart.MaxLength = 5;
             txtXlimitStart.Name = "txtXlimitStart";
             txtXlimitStart.Size = new Size(50, 29);
@@ -477,7 +477,7 @@
             // label12
             // 
             label12.AutoSize = true;
-            label12.Location = new Point(330, 31);
+            label12.Location = new Point(315, 31);
             label12.Margin = new Padding(4, 0, 4, 0);
             label12.Name = "label12";
             label12.Size = new Size(147, 21);
@@ -496,7 +496,7 @@
             // 
             // txt2DCend
             // 
-            txt2DCend.Location = new Point(268, 28);
+            txt2DCend.Location = new Point(243, 28);
             txt2DCend.MaxLength = 4;
             txt2DCend.Name = "txt2DCend";
             txt2DCend.Size = new Size(46, 29);
@@ -507,16 +507,16 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(168, 31);
+            label5.Location = new Point(158, 31);
             label5.Margin = new Padding(4, 0, 4, 0);
             label5.Name = "label5";
-            label5.Size = new Size(104, 21);
+            label5.Size = new Size(88, 21);
             label5.TabIndex = 99;
-            label5.Text = "2DC標終了：";
+            label5.Text = "2DC終了：";
             // 
             // txt2DCstart
             // 
-            txt2DCstart.Location = new Point(112, 28);
+            txt2DCstart.Location = new Point(96, 28);
             txt2DCstart.MaxLength = 4;
             txt2DCstart.Name = "txt2DCstart";
             txt2DCstart.Size = new Size(46, 29);
@@ -530,13 +530,13 @@
             label3.Location = new Point(12, 31);
             label3.Margin = new Padding(4, 0, 4, 0);
             label3.Name = "label3";
-            label3.Size = new Size(104, 21);
+            label3.Size = new Size(88, 21);
             label3.TabIndex = 99;
-            label3.Text = "2DC標開始：";
+            label3.Text = "2DC開始：";
             // 
             // btnRun
             // 
-            btnRun.Location = new Point(595, 567);
+            btnRun.Location = new Point(585, 567);
             btnRun.Margin = new Padding(4);
             btnRun.Name = "btnRun";
             btnRun.Size = new Size(110, 50);
@@ -558,7 +558,7 @@
             // 
             // btnClose
             // 
-            btnClose.Location = new Point(713, 567);
+            btnClose.Location = new Point(703, 567);
             btnClose.Margin = new Padding(4);
             btnClose.Name = "btnClose";
             btnClose.Size = new Size(110, 50);
@@ -579,7 +579,7 @@
             gro_removal.Controls.Add(chkDefectKind1);
             gro_removal.Location = new Point(39, 280);
             gro_removal.Name = "gro_removal";
-            gro_removal.Size = new Size(790, 100);
+            gro_removal.Size = new Size(780, 100);
             gro_removal.TabIndex = 9;
             gro_removal.TabStop = false;
             gro_removal.Text = "除去加工";
@@ -703,7 +703,7 @@
             // 
             AutoScaleDimensions = new SizeF(9F, 21F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(864, 651);
+            ClientSize = new Size(854, 651);
             Controls.Add(label14);
             Controls.Add(label13);
             Controls.Add(txtShippingFileName);

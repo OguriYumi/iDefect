@@ -530,7 +530,8 @@ namespace iDefect
                 }
                 try
                 {
-                    using (var reader = new StreamReader(txtCsvFile1.Text, Encoding.UTF8))
+                    using (var fileStream = new FileStream(txtCsvFile1.Text, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (var reader = new StreamReader(fileStream, Encoding.UTF8))        
                     using (var writer = new StreamWriter(filePath_shift1, false, Encoding.UTF8))
                     {
                         int iCount = 0;
@@ -544,14 +545,24 @@ namespace iDefect
                             if (iCount > rowCnt)
                             {
                                 string[] columns = line.Split(',');
-                                // 2列目が存在し、かつ、その値が数値であるか確認
-                                if (columns.Length >= 2 && double.TryParse(columns[1], out double value))
+                                // 空行チェック
+                                if (string.IsNullOrWhiteSpace(line)) continue;
+                                // 2列目が存在するか確認
+                                if (columns.Length < 2)
                                 {
-                                    // 2列目にシフト量を加算
-                                    columns[1] = (value + double.Parse(txtXshift1.Text)).ToString();
-                                    // 配列をカンマで結合して更新
-                                    line = string.Join(",", columns);
+                                    MessageBox.Show($"[Xシフト処理1]\n工程1のCSVファイル{iCount}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
                                 }
+                                // 2列目（X座標）が数値であるか確認
+                                if (!double.TryParse(columns[1], out double value))
+                                {
+                                    MessageBox.Show($"[Xシフト処理1]\n工程1のCSVファイル{iCount}行目のX座標（2列目）が数値ではありません（値: {columns[1]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                                // 2列目にシフト量を加算
+                                columns[1] = (value + double.Parse(txtXshift1.Text)).ToString();
+                                // 配列をカンマで結合して更新
+                                line = string.Join(",", columns);
                             }
                             // ヘッダ情報は工程1のCSVファイル1～5行目を使用し、それ以降は加工した行を書き込む
                             writer.WriteLine(line);
@@ -582,7 +593,8 @@ namespace iDefect
                 }
                 try
                 {
-                    using (var reader = new StreamReader(txtCsvFile2.Text, Encoding.UTF8))
+                    using (var fileStream = new FileStream(txtCsvFile2.Text, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (var reader = new StreamReader(fileStream, Encoding.UTF8))
                     using (var writer = new StreamWriter(filePath_shift2, false, Encoding.UTF8))
                     {
                         int iCount = 0;
@@ -596,14 +608,24 @@ namespace iDefect
                             if (iCount > rowCnt)
                             {
                                 string[] columns = line.Split(',');
-                                // 2列目が存在し、かつ、その値が数値であるか確認
-                                if (columns.Length >= 2 && double.TryParse(columns[1], out double value))
+                                // 空行チェック
+                                if (string.IsNullOrWhiteSpace(line)) continue;
+                                // 2列目が存在するか確認
+                                if (columns.Length < 2)
                                 {
-                                    // 2列目にシフト量を加算
-                                    columns[1] = (value + double.Parse(txtXshift2.Text)).ToString();
-                                    // 配列をカンマで結合して更新
-                                    line = string.Join(",", columns);
+                                    MessageBox.Show($"[Xシフト処理2]\n工程2のCSVファイル{iCount}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
                                 }
+                                // 2列目（X座標）が数値であるか確認
+                                if (!double.TryParse(columns[1], out double value))
+                                {
+                                    MessageBox.Show($"[Xシフト処理2]\n工程2のCSVファイル{iCount}行目のX座標（2列目）が数値ではありません（値: {columns[1]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                                // 2列目にシフト量を加算
+                                columns[1] = (value + double.Parse(txtXshift2.Text)).ToString();
+                                // 配列をカンマで結合して更新
+                                line = string.Join(",", columns);
                             }
                             // ヘッダ情報は工程2のCSVファイル1～5行目を使用し、それ以降は加工した行を書き込む
                             writer.WriteLine(line);
@@ -686,11 +708,30 @@ namespace iDefect
                     // ヘッダ（1～5行目）を退避
                     var header = allLines.Take(rowCnt).ToList();
                     // 明細行（6行目以降）を取得しソートする
-                    var sortedData = allLines.Skip(rowCnt)
-                                             .Select(line => new { OriginalLine = line, Columns = line.Split(',') })
-                                             // 3列目（インデックス：2）でソート（昇順）
-                                             .OrderBy(x => {if (double.TryParse(x.Columns[2], out double val)) return val; return 0.0;})
-                                             .Select(x => x.OriginalLine);
+                    var dataWithIndex = allLines.Skip(rowCnt)
+                                                 .Select((line, index) => new { Line = line, Index = index + rowCnt + 1, Columns = line.Split(',') })
+                                                 .ToList();
+
+                    // 3列目（Y座標）の数値変換チェック
+                    foreach (var item in dataWithIndex)
+                    {
+                        if (string.IsNullOrWhiteSpace(item.Line)) continue;
+                        if (item.Columns.Length < 3)
+                        {
+                            MessageBox.Show($"[Y座標昇順ソート]\n{item.Index}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        if (!double.TryParse(item.Columns[2], out _))
+                        {
+                            MessageBox.Show($"[Y座標昇順ソート]\n{item.Index}行目のY座標（3列目）が数値ではありません（値: {item.Columns[2]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                    }
+
+                    // ソート処理
+                    var sortedData = dataWithIndex
+                                     .OrderBy(x => double.Parse(x.Columns[2]))
+                                     .Select(x => x.Line);
 
                     // ヘッダとソート後のデータを結合して保存
                     File.WriteAllLines(filePath_sort, header.Concat(sortedData), Encoding.UTF8);
@@ -730,7 +771,13 @@ namespace iDefect
                     // 明細（6行目以降）をフィルタリング
                     var filteredData = allLines.Skip(rowCnt).Where(line =>
                     {
+                        // 空行チェック
+                        if (string.IsNullOrWhiteSpace(line)) return false;
+
                         string[] columns = line.Split(',');
+                        // 配列長チェック（4列目が存在するか）
+                        if (columns.Length < 4) return true; // 4列目がない場合は残す（除外対象外）
+
                         // 4列目（インデックス：3）を取得
                         string column4Value = columns[3].Trim();
                         // 4列目の文字列に、選択されたキーワードが含まれるか判定
@@ -774,14 +821,50 @@ namespace iDefect
                     // 7行目（dataLinesの2行目、Index: 1）からループを開始
                     for (int i = 1; i < dataLines.Count; i++)
                     {
+                        // 空行チェック
+                        if (string.IsNullOrWhiteSpace(dataLines[i]) || string.IsNullOrWhiteSpace(dataLines[i - 1]))
+                        {
+                            continue; // 空行はスキップ
+                        }
+
                         // 「1行上」のデータ
                         string[] prevCols = dataLines[i - 1].Split(',');
-                        double prevCol2 = double.Parse(prevCols[1]);// X座標
-                        double prevCol3 = double.Parse(prevCols[2]);// Y座標
+                        // 配列長チェック（3列以上必要）
+                        if (prevCols.Length < 3)
+                        {
+                            MessageBox.Show($"[重複処理]\n{i + rowCnt}行目の前行の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        if (!double.TryParse(prevCols[1], out double prevCol2))
+                        {
+                            MessageBox.Show($"[重複処理]\n{i + rowCnt}行目の前行のX座標（2列目）が数値ではありません（値: {prevCols[1]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        if (!double.TryParse(prevCols[2], out double prevCol3))
+                        {
+                            MessageBox.Show($"[重複処理]\n{i + rowCnt}行目の前行のY座標（3列目）が数値ではありません（値: {prevCols[2]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
                         // 「現在の行」のデータ
                         string[] currentCols = dataLines[i].Split(',');
-                        double currentCol2 = double.Parse(currentCols[1]);// X座標
-                        double currentCol3 = double.Parse(currentCols[2]);// Y座標
+                        // 配列長チェック（3列以上必要）
+                        if (currentCols.Length < 3)
+                        {
+                            MessageBox.Show($"[重複処理]\n{i + rowCnt + 1}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        if (!double.TryParse(currentCols[1], out double currentCol2))
+                        {
+                            MessageBox.Show($"[重複処理]\n{i + rowCnt + 1}行目のX座標（2列目）が数値ではありません（値: {currentCols[1]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        if (!double.TryParse(currentCols[2], out double currentCol3))
+                        {
+                            MessageBox.Show($"[重複処理]\n{i + rowCnt + 1}行目のY座標（3列目）が数値ではありません（値: {currentCols[2]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
                         // 差分の絶対値を計算
                         double diffCol2 = Math.Abs(currentCol2 - prevCol2);// X座標
                         double diffCol3 = Math.Abs(1000 * (currentCol3 - prevCol3));// Y座標（1000倍してm→mm変換）
@@ -795,9 +878,9 @@ namespace iDefect
                             // 再び「1行上の値（prev）」と比較させるためにインデックスを1つ戻す
                             i--;
                         }
-                        // ヘッダとフィルタリング後のデータを結合して上書き保存
-                        File.WriteAllLines(filePath_overlap, header.Concat(dataLines), Encoding.UTF8);
                     }
+                    // ヘッダとフィルタリング後のデータを結合して上書き保存
+                    File.WriteAllLines(filePath_overlap, header.Concat(dataLines), Encoding.UTF8);
                 }
                 catch (Exception ex)
                 {
@@ -872,23 +955,41 @@ namespace iDefect
                     // ヘッダ（1～5行目）を退避
                     var header = allLines.Take(rowCnt).ToList();
                     // 明細（6行目以降）を取得し、ソート用に分割
-                    var dataRows = allLines.Skip(rowCnt)
-                                           .Select(line => new { OriginalLine = line, Columns = line.Split(',') });
+                    var dataWithIndex = allLines.Skip(rowCnt)
+                                                 .Select((line, index) => new { Line = line, Index = index + rowCnt + 1, Columns = line.Split(',') })
+                                                 .ToList();
+
+                    // 3列目（Y座標）の数値変換チェック
+                    foreach (var item in dataWithIndex)
+                    {
+                        if (string.IsNullOrWhiteSpace(item.Line)) continue;
+                        if (item.Columns.Length < 3)
+                        {
+                            MessageBox.Show($"[昇降順指定]\n{item.Index}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        if (!double.TryParse(item.Columns[2], out _))
+                        {
+                            MessageBox.Show($"[昇降順指定]\n{item.Index}行目のY座標（3列目）が数値ではありません（値: {item.Columns[2]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                    }
+
                     // ラジオボタンの状態に応じて3列目（インデックス：2）をキーにソートを実行
                     IEnumerable<string> sortedLines;
                     if (optAsc.Checked)
                     {
                         // 昇順ソート
-                        sortedLines = dataRows
+                        sortedLines = dataWithIndex
                             .OrderBy(x => double.Parse(x.Columns[2]))
-                            .Select(x => x.OriginalLine);
+                            .Select(x => x.Line);
                     }
                     else
                     {
                         // 降順ソート
-                        sortedLines = dataRows
+                        sortedLines = dataWithIndex
                             .OrderByDescending(x => double.Parse(x.Columns[2]))
-                            .Select(x => x.OriginalLine);
+                            .Select(x => x.Line);
                     }
                     // ヘッダとソート後のデータを結合して保存
                     File.WriteAllLines(filePath_ysort, header.Concat(sortedLines), Encoding.UTF8);
@@ -922,18 +1023,42 @@ namespace iDefect
                     // ヘッダ（1～5行目）を退避
                     var header = allLines.Take(rowCnt).ToList();
                     // 明細（6行目以降）を取得し、3列目を変換して上書きする
-                    var processedData = allLines.Skip(rowCnt).Select(line =>
+                    var dataWithIndex = allLines.Skip(rowCnt)
+                                                 .Select((line, index) => new { Line = line, Index = index + rowCnt + 1, Columns = line.Split(',') })
+                                                 .ToList();
+
+                    // 3列目（Y座標）の数値変換チェックと変換
+                    var processedData = new List<string>();
+                    foreach (var item in dataWithIndex)
                     {
-                        string[] columns = line.Split(',');
-                        // 3列目（インデックス：2）を取得
-                        double val = double.Parse(columns[2]);
+                        // 空行チェック
+                        if (string.IsNullOrWhiteSpace(item.Line))
+                        {
+                            processedData.Add(item.Line);
+                            continue;
+                        }
+
+                        // 配列長チェック（3列以上必要）
+                        if (item.Columns.Length < 3)
+                        {
+                            MessageBox.Show($"[Y座標変換]\n{item.Index}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
+                        // 3列目（Y座標）が数値であるか確認
+                        if (!double.TryParse(item.Columns[2], out double val))
+                        {
+                            MessageBox.Show($"[Y座標変換]\n{item.Index}行目のY座標（3列目）が数値ではありません（値: {item.Columns[2]}）。\nCSVファイルの形式をご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
                         // 小数点以下を抽出して1000倍（例: 1.234 -> 234）
                         int newValue = (int)Math.Round((val % 1.0) * 1000);
                         // 3列目の値を書き換え
-                        columns[2] = newValue.ToString();
+                        item.Columns[2] = newValue.ToString();
                         // カンマで結合して1行に戻す
-                        return string.Join(",", columns);
-                    });
+                        processedData.Add(string.Join(",", item.Columns));
+                    }
                     // ヘッダと変換後のデータを結合して保存
                     File.WriteAllLines(filePath_coordinate, header.Concat(processedData), Encoding.UTF8);
                 }
@@ -955,14 +1080,29 @@ namespace iDefect
                 foreach (var line in allLines.Skip(rowCnt))
                 {
                     lineCount++;
+                    // 空行チェック
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
                     string[] columns = line.Split(',');
+                    // 配列長チェック（2列以上必要）
+                    if (columns.Length < 2)
+                    {
+                        MessageBox.Show($"[出荷前処理（X座標チェック）]\n{lineCount}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
                     // 2列目（インデックス：1）を数値に変換して範囲をチェック
-                    double col2Value = double.Parse(columns[1]);
+                    if (!double.TryParse(columns[1], out double col2Value))
+                    {
+                        MessageBox.Show($"[出荷前処理（X座標チェック）]\n{lineCount}行目のX座標が数値ではありません。\nCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
                     // 開始値未満、または終了値を超えている（＝範囲外）の場合
                     if (col2Value < double.Parse(txtXlimitStart.Text) || col2Value > double.Parse(txtXlimitEnd.Text))
                     {
                         // メッセージを表示して処理を中断
-                        MessageBox.Show("出荷前処理にてX座標が指定範囲を超えています。\n設定値やCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                        MessageBox.Show($"[出荷前処理（X座標チェック）]\n{lineCount}行目のX座標が指定範囲を超えています（値: {col2Value}）。\n設定値やCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK,MessageBoxIcon.Warning);
                         return; // メソッド全体の処理を抜ける
                     }
                 }
@@ -978,14 +1118,29 @@ namespace iDefect
                 foreach (var line in allLines.Skip(rowCnt))
                 {
                     lineCount++;
+                    // 空行チェック
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
                     string[] columns = line.Split(',');
+                    // 配列長チェック（3列以上必要）
+                    if (columns.Length < 3)
+                    {
+                        MessageBox.Show($"[出荷前処理（Y座標チェック）]\n{lineCount}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
                     // 3列目（インデックス：2）を数値に変換して範囲をチェック
-                    double col3Value = double.Parse(columns[2]);
+                    if (!double.TryParse(columns[2], out double col3Value))
+                    {
+                        MessageBox.Show($"[出荷前処理（Y座標チェック）]\n{lineCount}行目のY座標が数値ではありません。\nCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
                     // 開始値未満、または終了値を超えている（＝範囲外）の場合
                     if (col3Value < double.Parse(txtYlimitStart.Text) || col3Value > double.Parse(txtYlimitEnd.Text))
                     {
                         // メッセージを表示して処理を中断
-                        MessageBox.Show("出荷前処理にてY座標が指定範囲を超えています。\n設定値やCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show($"[出荷前処理（Y座標チェック）]\n{lineCount}行目のY座標が指定範囲を超えています（値: {col3Value}）。\n設定値やCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return; // メソッド全体の処理を抜ける
                     }
                 }
@@ -1174,8 +1329,8 @@ namespace iDefect
             }
             if (!short.TryParse(txtXoverlap.Text, out xOverlap)) errors.Add("重複判定X距離は整数で指定してください。");
             if (!short.TryParse(txtYoverlap.Text, out yOverlap)) errors.Add("重複判定Y距離は整数で指定してください。");
-            if (!short.TryParse(txt2DCstart.Text, out start2DC)) errors.Add("2DC標開始は整数で指定してください。");
-            if (!short.TryParse(txt2DCend.Text, out end2DC)) errors.Add("2DC標終了は整数で指定してください。");
+            if (!short.TryParse(txt2DCstart.Text, out start2DC)) errors.Add("2DC座標開始は整数で指定してください。");
+            if (!short.TryParse(txt2DCend.Text, out end2DC)) errors.Add("2DC座標終了は整数で指定してください。");
             if (!short.TryParse(txtXlimitStart.Text, out xLimitStart)) errors.Add("X座標限度値開始は整数で指定してください。");
             if (!short.TryParse(txtXlimitEnd.Text, out xLimitEnd)) errors.Add("X座標限度値終了は整数で指定してください。");
             if (!short.TryParse(txtYlimitStart.Text, out yLimitStart)) errors.Add("Y座標限度値開始は整数で指定してください。");
@@ -1188,9 +1343,9 @@ namespace iDefect
                 if (xShift2 < -1650.0 || 1650.0 < xShift2) errors.Add("Xシフト量2は-1650.0以上、1650.0以下の値を指定してください。");
                 if (xOverlap < 0 || 99 < xOverlap) errors.Add("重複判定X距離は0以上、99以下の値を指定してください。");
                 if (yOverlap < 0 || 99 < yOverlap) errors.Add("重複判定Y距離は0以上、99以下の値を指定してください。");
-                if (start2DC < 0 || 9999 < start2DC) errors.Add("2DC標開始は0以上、9999以下の値を指定してください。");
-                if (end2DC < 0 || 9999 < end2DC) errors.Add("2DC標終了は0以上、9999以下の値を指定してください。");
-                if (start2DC > end2DC) errors.Add("2DC標の開始値が終了値より大きくなっています。");
+                if (start2DC < 0 || 9999 < start2DC) errors.Add("2DC座標開始は0以上、9999以下の値を指定してください。");
+                if (end2DC < 0 || 9999 < end2DC) errors.Add("2DC座標終了は0以上、9999以下の値を指定してください。");
+                if (start2DC > end2DC) errors.Add("2DC座標の開始値が終了値より大きくなっています。");
                 if (xLimitStart < -1650 || 1650 < xLimitEnd) errors.Add("X座標限度値開始は-1650以上、1650以下の値を指定してください。");
                 if (xLimitStart > xLimitEnd) errors.Add("X座標限度値の開始値が終了値より大きくなっています。");
                 if (yLimitStart < 0 || 1001 < yLimitEnd) errors.Add("Y座標限度値開始は0以上、1001以下の値を指定してください。");
@@ -1241,7 +1396,8 @@ namespace iDefect
         private bool ChkCsv明細チェック(System.Windows.Forms.TextBox txt,string name)
         {
             int lineCount = 0;
-            using (var reader = new StreamReader(txt.Text, Encoding.UTF8))
+            using (var fileStream = new FileStream(txt.Text, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new StreamReader(fileStream, Encoding.UTF8))
             {
                 string? line;
                 while ((line = reader.ReadLine()) != null)
