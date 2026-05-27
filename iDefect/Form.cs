@@ -20,6 +20,10 @@ namespace iDefect
         {
             InitializeComponent();
 
+            // フォームタイトルにバージョン情報を追加
+            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            this.Text = $"{this.Text}   (ver {version?.Major}.{version?.Minor}.{version?.Build}.{version?.Revision})";
+
             // 初期セット
             txtCsvFile1.Text = defaultTextCSV;
             txtCsvFile1.ForeColor = SystemColors.GrayText; // 初期値は薄い色にする
@@ -1202,9 +1206,10 @@ namespace iDefect
                                  "５．　Y座標ソート　 ：出荷ファイル名＋_sort.csv\n" +
                                  "６．　除去加工　　　：出荷ファイル名＋_exclusion.csv\n" +
                                  "７．　重複処理　　　：出荷ファイル名＋_overlap.csv\n" +
-                                 "８．　昇降順指定　　：出荷ファイル名＋_ysort.csv\n" +
-                                 "９．　Y座標変換　　 ：出荷ファイル名＋_coordinate.csv\n" +
-                                 "１０．出荷前　　　　：出荷ファイル名＋_previous.csv";
+                                 "８．　抽出加工      ：出荷ファイル名＋_extraction\n" +
+                                 "９．　昇降順指定　　：出荷ファイル名＋_ysort.csv\n" +
+                                 "１０．Y座標変換　　 ：出荷ファイル名＋_coordinate.csv\n" +
+                                 "１１．出荷前　　　　：出荷ファイル名＋_previous.csv";
                 try
                 {
                     // ファイルを出力（文字コードはUTF-8を指定、既存ファイルがある場合は上書き）
