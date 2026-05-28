@@ -420,16 +420,17 @@ namespace iDefect
                 {
                     // 重複ファイルの存在チェック
                     bool hasDuplicate = false;
-                    List<string> lstFilename = [ fileNameWithoutExt + s設定パラメータ + sExtension,
-                                                 fileNameWithoutExt + sXシフト加工1 + sExtension,
-                                                 fileNameWithoutExt + sXシフト加工2 + sExtension,
-                                                 fileNameWithoutExt + s単純マージ + sExtension,
-                                                 fileNameWithoutExt + sY座標ソート + sExtension,
-                                                 fileNameWithoutExt + s除去加工 + sExtension,
-                                                 fileNameWithoutExt + s重複処理 + sExtension,
-                                                 fileNameWithoutExt + s抽出加工 + sExtension,
-                                                 fileNameWithoutExt + sY座標昇降順 + sExtension,
-                                                 fileNameWithoutExt + sY座標変換 + sExtension];
+                    List<string> lstFilename = [ "1"+fileNameWithoutExt + s設定パラメータ + sExtension,
+                                                 "2"+fileNameWithoutExt + sXシフト加工1 + sExtension,
+                                                 "3"+fileNameWithoutExt + sXシフト加工2 + sExtension,
+                                                 "4"+fileNameWithoutExt + s単純マージ + sExtension,
+                                                 "5"+fileNameWithoutExt + sY座標ソート + sExtension,
+                                                 "6"+fileNameWithoutExt + s除去加工 + sExtension,
+                                                 "7"+fileNameWithoutExt + s重複処理 + sExtension,
+                                                 "8"+fileNameWithoutExt + s抽出加工 + sExtension,
+                                                 "9"+fileNameWithoutExt + sY座標昇降順 + sExtension,
+                                                 "10"+fileNameWithoutExt + sY座標変換 + sExtension,
+                                                 "11"+fileNameWithoutExt + s出荷前 + sExtension];
                     foreach (string fileName in lstFilename)
                     {
                         // フォルダパスとリストのファイル名を結合
@@ -452,13 +453,13 @@ namespace iDefect
 
 
                 //-----------------------------------
-                // [設定パラメータ保存]
+                // [１．設定パラメータ保存]
                 // 画面入力値をCSVファイルに出力する
                 //-----------------------------------
                 try
                 {
                     // 設定パラメータ保存先ファイルのパス生成
-                    string filePath_para = AppendToFileName(filePath, s設定パラメータ);
+                    string filePath_para = AppendToFileName("1", filePath, s設定パラメータ);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_para) && IsFileLocked(filePath_para))
                     {
@@ -517,12 +518,12 @@ namespace iDefect
 
 
                 //----------------------------------------------------
-                // [CSVデータ加工1-1]
+                // [２．CSVデータ加工1-1]
                 // Xシフト処理1
                 // 工程1のCSVファイル2列目（X座標）にXシフト量1を加算
                 //----------------------------------------------------
                 // Xシフト加工後保存先ファイルのパス生成
-                string filePath_shift1 = AppendToFileName(filePath, sXシフト加工1);
+                string filePath_shift1 = AppendToFileName("2", filePath, sXシフト加工1);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_shift1) && IsFileLocked(filePath_shift1))
                 {
@@ -558,13 +559,19 @@ namespace iDefect
                                     return;
                                 }
                                 // 2列目（X座標）が数値であるか確認
-                                if (!double.TryParse(columns[1], out double value))
+                                if (!decimal.TryParse(columns[1], out decimal value))       
                                 {
                                     MessageBox.Show($"[Xシフト処理1]\n工程1のCSVファイル{iCount}行目のX座標（2列目）が数値ではありません（値: {columns[1]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     return;
                                 }
+                                // Xシフト量を数値に変換
+                                if (!decimal.TryParse(txtXshift1.Text, out decimal shiftAmount))
+                                {
+                                    MessageBox.Show($"[Xシフト処理1]\nXシフト量1が数値ではありません（値: {txtXshift1.Text}）。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
                                 // 2列目にシフト量を加算
-                                columns[1] = (value + double.Parse(txtXshift1.Text)).ToString();
+                                columns[1] = (value + shiftAmount).ToString("G29");
                                 // 配列をカンマで結合して更新
                                 line = string.Join(",", columns);
                             }
@@ -580,12 +587,12 @@ namespace iDefect
                 }
 
                 //----------------------------------------------------
-                // [CSVデータ加工1-2]
+                // [３．CSVデータ加工1-2]
                 // Xシフト処理2
                 // 工程2のCSVファイル2列目（X座標）にXシフト量2を加算
                 //----------------------------------------------------
                 // Xシフト加工後保存先ファイルのパス生成
-                string filePath_shift2 = AppendToFileName(filePath, sXシフト加工2);
+                string filePath_shift2 = AppendToFileName("3", filePath, sXシフト加工2);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_shift2) && IsFileLocked(filePath_shift2))
                 {
@@ -621,13 +628,19 @@ namespace iDefect
                                     return;
                                 }
                                 // 2列目（X座標）が数値であるか確認
-                                if (!double.TryParse(columns[1], out double value))
+                                if (!decimal.TryParse(columns[1], out decimal value))
                                 {
                                     MessageBox.Show($"[Xシフト処理2]\n工程2のCSVファイル{iCount}行目のX座標（2列目）が数値ではありません（値: {columns[1]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     return;
                                 }
+                                // Xシフト量を数値に変換
+                                if (!decimal.TryParse(txtXshift2.Text, out decimal shiftAmount))
+                                {
+                                    MessageBox.Show($"[Xシフト処理2]\nXシフト量2が数値ではありません（値: {txtXshift2.Text}）。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
                                 // 2列目にシフト量を加算
-                                columns[1] = (value + double.Parse(txtXshift2.Text)).ToString();
+                                columns[1] = (value + shiftAmount).ToString("G29");
                                 // 配列をカンマで結合して更新
                                 line = string.Join(",", columns);
                             }
@@ -643,12 +656,12 @@ namespace iDefect
                 }
 
                 //------------------------------------------------------------
-                // [CSVデータ加工2]
+                // [４．CSVデータ加工2]
                 // 単純マージ
                 // 工程2で生成したファイルに工程1の明細を追記（工程1のヘッダ情報は使用しない）
                 //------------------------------------------------------------
                 // 単純マージ後保存先ファイルのパス生成
-                string filePath_merge = AppendToFileName(filePath, s単純マージ);
+                string filePath_merge = AppendToFileName("4", filePath, s単純マージ);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_merge) && IsFileLocked(filePath_merge))
                 {
@@ -690,12 +703,12 @@ namespace iDefect
                 var allLines = new List<string>();
 
                 //---------------------------------------------------
-                // [CSVデータ加工3]
+                // [５．CSVデータ加工3]
                 // Y座標昇順ソート
                 // CSVファイル3列目（Y座標）をキーにして全行を昇順でソート
                 //---------------------------------------------------
                 // Xシフト加工後保存先ファイルのパス生成
-                string filePath_sort = AppendToFileName(filePath, sY座標ソート);
+                string filePath_sort = AppendToFileName("5", filePath, sY座標ソート);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_sort) && IsFileLocked(filePath_sort))
                 {
@@ -725,7 +738,7 @@ namespace iDefect
                             MessageBox.Show($"[Y座標昇順ソート]\n{item.Index}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        if (!double.TryParse(item.Columns[2], out _))
+                        if (!decimal.TryParse(item.Columns[2], out _))
                         {
                             MessageBox.Show($"[Y座標昇順ソート]\n{item.Index}行目のY座標（3列目）が数値ではありません（値: {item.Columns[2]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
@@ -734,7 +747,7 @@ namespace iDefect
 
                     // ソート処理
                     var sortedData = dataWithIndex
-                                     .OrderBy(x => double.Parse(x.Columns[2]))
+                                     .OrderBy(x => decimal.Parse(x.Columns[2]))
                                      .Select(x => x.Line);
 
                     // ヘッダとソート後のデータを結合して保存
@@ -747,12 +760,12 @@ namespace iDefect
                 }
 
                 //---------------------------------------------------
-                // [CSVデータ加工4]
+                // [６．CSVデータ加工4]
                 // 除去加工
                 // chkDefectKind1～8のチェックされている値がCSVファイル4列目（欠点種類）に含まれる行を除去
                 //---------------------------------------------------
                 //除去加工後保存先ファイルのパス生成
-                string filePath_exclusion = AppendToFileName(filePath, s除去加工);
+                string filePath_exclusion = AppendToFileName("6", filePath, s除去加工);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_exclusion) && IsFileLocked(filePath_exclusion))
                 {
@@ -799,12 +812,12 @@ namespace iDefect
                 }
 
                 //---------------------------------------------------
-                // [CSVデータ加工5]
+                // [７．CSVデータ加工5]
                 // 重複処理
                 // CSVファイル2列目（X座標）1行上との差分と、3列目（Y座標）1行上との差分が画面で指定された値より小さい場合、該当行を削除
                 //---------------------------------------------------
                 // 重複処理後保存先ファイルのパス生成
-                string filePath_overlap = AppendToFileName(filePath, s重複処理);
+                string filePath_overlap = AppendToFileName("7", filePath, s重複処理);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_overlap) && IsFileLocked(filePath_overlap))
                 {
@@ -839,12 +852,12 @@ namespace iDefect
                             MessageBox.Show($"[重複処理]\n{i + rowCnt}行目の前行の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        if (!double.TryParse(prevCols[1], out double prevCol2))
+                        if (!decimal.TryParse(prevCols[1], out decimal prevCol2))
                         {
                             MessageBox.Show($"[重複処理]\n{i + rowCnt}行目の前行のX座標（2列目）が数値ではありません（値: {prevCols[1]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        if (!double.TryParse(prevCols[2], out double prevCol3))
+                        if (!decimal.TryParse(prevCols[2], out decimal prevCol3))
                         {
                             MessageBox.Show($"[重複処理]\n{i + rowCnt}行目の前行のY座標（3列目）が数値ではありません（値: {prevCols[2]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
@@ -858,20 +871,20 @@ namespace iDefect
                             MessageBox.Show($"[重複処理]\n{i + rowCnt + 1}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        if (!double.TryParse(currentCols[1], out double currentCol2))
+                        if (!decimal.TryParse(currentCols[1], out decimal currentCol2))
                         {
                             MessageBox.Show($"[重複処理]\n{i + rowCnt + 1}行目のX座標（2列目）が数値ではありません（値: {currentCols[1]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        if (!double.TryParse(currentCols[2], out double currentCol3))
+                        if (!decimal.TryParse(currentCols[2], out decimal currentCol3))
                         {
                             MessageBox.Show($"[重複処理]\n{i + rowCnt + 1}行目のY座標（3列目）が数値ではありません（値: {currentCols[2]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
 
                         // 差分の絶対値を計算
-                        double diffCol2 = Math.Abs(currentCol2 - prevCol2);// X座標
-                        double diffCol3 = Math.Abs(1000 * (currentCol3 - prevCol3));// Y座標（1000倍してm→mm変換）
+                        decimal diffCol2 = Math.Abs(currentCol2 - prevCol2);// X座標
+                        decimal diffCol3 = Math.Abs(1000 * (currentCol3 - prevCol3));// Y座標（1000倍してm→mm変換）
 
                         // X座標の差分がX距離より小さい、かつ、Y座標の差分がY距離より小さい場合
                         if (diffCol2 < int.Parse(txtXoverlap.Text) && diffCol3 < int.Parse(txtYoverlap.Text))
@@ -893,12 +906,12 @@ namespace iDefect
                 }
 
                 //---------------------------------------------------
-                // [CSVデータ加工6]
+                // [８．CSVデータ加工6]
                 // 抽出処理
                 // CSVファイル1列目（2DC）を画面で指定された範囲で絞り込み
                 //---------------------------------------------------
                 // 抽出処理後保存先ファイルのパス生成
-                string filePath_extraction = AppendToFileName(filePath, s抽出加工);
+                string filePath_extraction = AppendToFileName("8", filePath, s抽出加工);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_extraction) && IsFileLocked(filePath_extraction))
                 {
@@ -937,12 +950,12 @@ namespace iDefect
                 }
 
                 //---------------------------------------------------
-                // [CSVデータ加工7]
+                // [９．CSVデータ加工7]
                 // 昇降順指定
                 // CSVファイル3列目（Y座標）をキーにして全行を画面で指定された順でソート
                 //---------------------------------------------------
                 // 昇降順指定後保存先ファイルのパス生成
-                string filePath_ysort = AppendToFileName(filePath, sY座標昇降順);
+                string filePath_ysort = AppendToFileName("9", filePath, sY座標昇降順);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_ysort) && IsFileLocked(filePath_ysort))
                 {
@@ -972,7 +985,7 @@ namespace iDefect
                             MessageBox.Show($"[昇降順指定]\n{item.Index}行目の列数が不足しています。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        if (!double.TryParse(item.Columns[2], out _))
+                        if (!decimal.TryParse(item.Columns[2], out _))
                         {
                             MessageBox.Show($"[昇降順指定]\n{item.Index}行目のY座標（3列目）が数値ではありません（値: {item.Columns[2]}）。\nCSVファイルをご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
@@ -985,14 +998,14 @@ namespace iDefect
                     {
                         // 昇順ソート
                         sortedLines = dataWithIndex
-                            .OrderBy(x => double.Parse(x.Columns[2]))
+                            .OrderBy(x => decimal.Parse(x.Columns[2]))
                             .Select(x => x.Line);
                     }
                     else
                     {
                         // 降順ソート
                         sortedLines = dataWithIndex
-                            .OrderByDescending(x => double.Parse(x.Columns[2]))
+                            .OrderByDescending(x => decimal.Parse(x.Columns[2]))
                             .Select(x => x.Line);
                     }
                     // ヘッダとソート後のデータを結合して保存
@@ -1005,12 +1018,12 @@ namespace iDefect
                 }
 
                 //---------------------------------------------------
-                // [CSVデータ加工8]
+                // [１０．CSVデータ加工8]
                 // Y座標変換
                 // CSVファイル3列目（Y座標）の値から小数点以下を抜き出し1000倍した値で上書きする
                 //---------------------------------------------------
                 // Y座標変換後保存先ファイルのパス生成
-                string filePath_coordinate = AppendToFileName(filePath, sY座標変換);
+                string filePath_coordinate = AppendToFileName("10", filePath, sY座標変換);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_coordinate) && IsFileLocked(filePath_coordinate))
                 {
@@ -1050,14 +1063,14 @@ namespace iDefect
                         }
 
                         // 3列目（Y座標）が数値であるか確認
-                        if (!double.TryParse(item.Columns[2], out double val))
+                        if (!decimal.TryParse(item.Columns[2], out decimal val))
                         {
                             MessageBox.Show($"[Y座標変換]\n{item.Index}行目のY座標（3列目）が数値ではありません（値: {item.Columns[2]}）。\nCSVファイルの形式をご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
 
                         // 小数点以下を抽出して1000倍（例: 1.234 -> 234）
-                        int newValue = (int)Math.Round((val % 1.0) * 1000);
+                        int newValue = (int)Math.Round((val % 1.0m) * 1000);
                         // 3列目の値を書き換え
                         item.Columns[2] = newValue.ToString();
                         // カンマで結合して1行に戻す
@@ -1096,14 +1109,19 @@ namespace iDefect
                     }
 
                     // 2列目（インデックス：1）を数値に変換して範囲をチェック
-                    if (!double.TryParse(columns[1], out double col2Value))
+                    if (!decimal.TryParse(columns[1], out decimal col2Value))
                     {
                         MessageBox.Show($"[出荷前処理（X座標チェック）]\n{lineCount}行目のX座標が数値ではありません。\nCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
 
                     // 開始値未満、または終了値を超えている（＝範囲外）の場合
-                    if (col2Value < double.Parse(txtXlimitStart.Text) || col2Value > double.Parse(txtXlimitEnd.Text))
+                    if (!decimal.TryParse(txtXlimitStart.Text, out decimal xlimitStart) || !decimal.TryParse(txtXlimitEnd.Text, out decimal xlimitEnd))
+                    {
+                        MessageBox.Show($"[出荷前処理（X座標チェック）]\nX座標限度値の設定が不正です。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    if (col2Value < xlimitStart || col2Value > xlimitEnd)
                     {
                         // メッセージを表示して処理を中断
                         MessageBox.Show($"[出荷前処理（X座標チェック）]\n{lineCount}行目のX座標が指定範囲を超えています（値: {col2Value}）。\n設定値やCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK,MessageBoxIcon.Warning);
@@ -1134,14 +1152,19 @@ namespace iDefect
                     }
 
                     // 3列目（インデックス：2）を数値に変換して範囲をチェック
-                    if (!double.TryParse(columns[2], out double col3Value))
+                    if (!decimal.TryParse(columns[2], out decimal col3Value))
                     {
                         MessageBox.Show($"[出荷前処理（Y座標チェック）]\n{lineCount}行目のY座標が数値ではありません。\nCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
 
                     // 開始値未満、または終了値を超えている（＝範囲外）の場合
-                    if (col3Value < double.Parse(txtYlimitStart.Text) || col3Value > double.Parse(txtYlimitEnd.Text))
+                    if (!decimal.TryParse(txtYlimitStart.Text, out decimal ylimitStart) || !decimal.TryParse(txtYlimitEnd.Text, out decimal ylimitEnd))
+                    {
+                        MessageBox.Show($"[出荷前処理（Y座標チェック）]\nY座標限度値の設定が不正です。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    if (col3Value < ylimitStart || col3Value > ylimitEnd)
                     {
                         // メッセージを表示して処理を中断
                         MessageBox.Show($"[出荷前処理（Y座標チェック）]\n{lineCount}行目のY座標が指定範囲を超えています（値: {col3Value}）。\n設定値やCSVファイルをご確認ください。\n処理を中断します。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -1150,12 +1173,12 @@ namespace iDefect
                 }
 
                 //---------------------------------------------------
-                // [CSVデータ加工10]
+                // [１１．CSVデータ加工10]
                 // 出荷ファイル生成
                 // CSVファイル4列目以降のデータを削除（1列目～3列目だけを残す）
                 //---------------------------------------------------
                 // 出荷前保存先ファイルのパス生成
-                string filePath_previous = AppendToFileName(filePath, s出荷前);
+                string filePath_previous = AppendToFileName("11", filePath, s出荷前);
                 // ファイルが既に存在し、かつロックされているかチェック
                 if (File.Exists(filePath_previous) && IsFileLocked(filePath_previous))
                 {
@@ -1412,8 +1435,8 @@ namespace iDefect
                     if (lineCount > rowCnt)
                     {
                         string[] columns = line.Split(',');
-                        // 要素数の確認（2DC、X座標、Y座標、欠点種類、付帯情報…最低でも5つは必要）
-                        if (columns.Length < 5)
+                        // 要素数の確認（2DC、X座標、Y座標、欠点種類、（付帯情報）…最低でも4つは必要）
+                        if (columns.Length < 4)
                         {
                             MessageBox.Show(name + "のCSVファイル" + $"{lineCount}行目の要素数が不足しています。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return false;
@@ -1450,11 +1473,12 @@ namespace iDefect
         /// <summary>
         /// ファイル名からフォルダを生成しファイル名にサフィックスを追加
         /// </summary>
+        /// <param name="fileNo">ファイル名の先頭に付ける番号</param>
         /// <param name="filePath">元のファイルパス</param>
         /// <param name="suffix">追加するサフィックス</param>
         /// <returns>元のファイルパスと同階層にファイル名と同じ名称のフォルダを作成し、そのフォルダ内にサフィックスを追加した新しいファイルのパスを返します</returns>
         /// <exception cref="ArgumentException"></exception>
-        private static string AppendToFileName(string filePath, string suffix)
+        private static string AppendToFileName(string fileNo, string filePath, string suffix)
         {
             // ディレクトリ、拡張子なしファイル名、拡張子を抽出
             string directory = Path.GetDirectoryName(filePath) ?? "";
@@ -1462,7 +1486,7 @@ namespace iDefect
             string extension = Path.GetExtension(filePath);
 
             // 新しいファイル名を構築
-            string newFileName = $"{fileNameWithoutExt}{suffix}{extension}";
+            string newFileName = $"{fileNo}{fileNameWithoutExt}{suffix}{extension}";
 
             // 新しいフォルダパスを生成
             string newFolderPath = Path.Combine(directory, fileNameWithoutExt);
