@@ -403,7 +403,7 @@ namespace iDefect
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
                 // 新しいフォルダパスを生成（生成途中のファイルを保存するためのフォルダ）
                 string processFolderPath = Path.Combine(directory, fileNameWithoutExt + "_process");
-                //各過程のファイル名
+                // 各過程のファイル名
                 string s設定パラメータ = "1" + fileNameWithoutExt + "_para" + sExtension;
                 string sXシフト加工1 = "2" + fileNameWithoutExt + "_shift1" + sExtension;
                 string sXシフト加工2 = "3" + fileNameWithoutExt + "_shift2" + sExtension;
@@ -453,7 +453,7 @@ namespace iDefect
                 }
 
 
-                // 処理中オーバーレイを表示し、カーソルを待機状態にする
+                // カーソルを待機状態にする
                 Cursor.Current = Cursors.WaitCursor;
                 try
                 {
@@ -758,6 +758,7 @@ namespace iDefect
                         // ソート処理
                         var sortedData = dataWithIndex
                                          .OrderBy(x => decimal.Parse(x.Columns[2]))
+                                         .ThenBy(x => decimal.Parse(x.Columns[1]))
                                          .Select(x => x.Line);
 
                         // ヘッダとソート後のデータを結合して保存
@@ -1009,6 +1010,7 @@ namespace iDefect
                             // 昇順ソート
                             sortedLines = dataWithIndex
                                 .OrderBy(x => decimal.Parse(x.Columns[2]))
+                                .ThenBy(x => decimal.Parse(x.Columns[1]))
                                 .Select(x => x.Line);
                         }
                         else
@@ -1016,6 +1018,7 @@ namespace iDefect
                             // 降順ソート
                             sortedLines = dataWithIndex
                                 .OrderByDescending(x => decimal.Parse(x.Columns[2]))
+                                .ThenByDescending(x => decimal.Parse(x.Columns[1]))
                                 .Select(x => x.Line);
                         }
                         // ヘッダとソート後のデータを結合して保存
