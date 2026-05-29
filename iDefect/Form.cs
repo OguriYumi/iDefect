@@ -1,4 +1,4 @@
-using System.Configuration;
+﻿using System.Configuration;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -11,7 +11,7 @@ namespace iDefect
     {
         const string defaultTextCSV = "CSVファイルを選択してください";
         const string defaultTextShipping = "出荷ファイル名を指定してください";
-        const short rowCnt = 5; // ヘッダ行数
+        const short rowCnt = 5; // CSVファイルのヘッダ行数
 
         /// <summary>
         /// フォームのコンストラクタ
@@ -342,131 +342,134 @@ namespace iDefect
             //----------------------------------
             if (!ChkCsv明細チェック(txtCsvFile2, "工程2")) { return; }
 
-                // ファイル保存先指定ダイアログ
-                using (SaveFileDialog sfd = new SaveFileDialog())
+            // ファイル保存先指定ダイアログ
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                // ダイアログタイトル
+                sfd.Title = "保存先ファイルを指定してください";
+                // 初期フォルダを設定（設定値があればそれを使う）
+                string initialDir = @"C:\DNP";
+                var appDefaultOutput = ConfigurationManager.AppSettings["DefaultOutputFolder"];
+                if (!string.IsNullOrWhiteSpace(appDefaultOutput))
                 {
-                    // ダイアログタイトル
-                    sfd.Title = "保存先ファイルを指定してください";
-                    // 初期フォルダを設定（設定値があればそれを使う）
-                    string initialDir = @"C:\DNP";
-                    var appDefaultOutput = ConfigurationManager.AppSettings["DefaultOutputFolder"];
-                    if (!string.IsNullOrWhiteSpace(appDefaultOutput))
-                    {
-                        initialDir = appDefaultOutput;
-                    }
-                    sfd.InitialDirectory = initialDir;
-                    // 初期ファイル名を設定（テキストがデフォルトプレースホルダなら既定名を使う）
-                    string initialFileName = "filename";
-                    if (!string.IsNullOrWhiteSpace(txtShippingFileName.Text) && txtShippingFileName.Text != defaultTextShipping)
-                    {
-                        initialFileName = txtShippingFileName.Text;
-                    }
-                    else
-                    {
-                        var appShipping = ConfigurationManager.AppSettings["ShippingFile"];
-                        if (!string.IsNullOrWhiteSpace(appShipping)) initialFileName = appShipping;
-                    }
-                    sfd.FileName = initialFileName;
-                    sfd.Filter = "CSVファイル(*.csv)|*.csv";
-                    sfd.DefaultExt = "csv";
-                    sfd.AddExtension = true;
-                    sfd.OverwritePrompt = true;
-                    const string sExtension = ".csv";
-                    const string s設定パラメータ = "_para";
-                    const string sXシフト加工1 = "_shift1";
-                    const string sXシフト加工2 = "_shift2";
-                    const string s単純マージ = "_merge";
-                    const string sY座標ソート = "_sort";
-                    const string s除去加工 = "_exclusion";
-                    const string s重複処理 = "_overlap";
-                    const string s抽出加工 = "_extraction";
-                    const string sY座標昇降順 = "_ysort";
-                    const string sY座標変換 = "_coordinate";
-                    const string s出荷前 = "_previous";
+                    initialDir = appDefaultOutput;
+                }
+                sfd.InitialDirectory = initialDir;
+                // 初期ファイル名を設定（テキストがデフォルトプレースホルダなら既定名を使う）
+                string initialFileName = "filename";
+                if (!string.IsNullOrWhiteSpace(txtShippingFileName.Text) && txtShippingFileName.Text != defaultTextShipping)
+                {
+                    initialFileName = txtShippingFileName.Text;
+                }
+                else
+                {
+                    var appShipping = ConfigurationManager.AppSettings["ShippingFile"];
+                    if (!string.IsNullOrWhiteSpace(appShipping)) initialFileName = appShipping;
+                }
+                sfd.FileName = initialFileName;
+                sfd.Filter = "CSVファイル(*.csv)|*.csv";
+                sfd.DefaultExt = "csv";
+                sfd.AddExtension = true;
+                sfd.OverwritePrompt = true;
+                const string sExtension = ".csv";
 
-                    // ファイル保存先指定ダイアログ表示（キャンセルされたら処理を抜ける）
-                    if (sfd.ShowDialog() == DialogResult.Cancel) { return; }
+                // ファイル保存先指定ダイアログ表示（キャンセルされたら処理を抜ける）
+                if (sfd.ShowDialog() == DialogResult.Cancel) { return; }
 
-                    // 出荷データ保存先ファイルのパス取得
-                    string filePath = sfd.FileName;
-                    // ファイルが既に存在し、かつロックされているかチェック
-                    if (File.Exists(filePath) && IsFileLocked(filePath))
-                    {
-                        MessageBox.Show("指定されたファイルが別のプロセスで開かれているため保存できません。" +
-                                        "\nファイルを閉じてから再度お試しください。" +
-                                        "\n（ファイルパス：" + filePath + "）",
-                                        "ファイルオープンエラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-                    // 選択されたファイルの拡張子をチェック
-                    if (Path.GetExtension(filePath).ToLower() != ".csv")
-                    {
-                        // 強制的に .csv に置き換える
-                        filePath = Path.ChangeExtension(filePath, ".csv");
-                    }
+                // 出荷データ保存先ファイルのパス取得
+                string filePath = sfd.FileName;
+                // ファイルが既に存在し、かつロックされているかチェック
+                if (File.Exists(filePath) && IsFileLocked(filePath))
+                {
+                    MessageBox.Show("指定されたファイルが別のプロセスで開かれているため保存できません。" +
+                                    "\nファイルを閉じてから再度お試しください。" +
+                                    "\n（ファイルパス：" + filePath + "）",
+                                    "ファイルオープンエラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                // 選択されたファイルの拡張子をチェック
+                if (Path.GetExtension(filePath).ToLower() != sExtension)
+                {
+                    // 強制的に .csv に置き換える
+                    filePath = Path.ChangeExtension(filePath, sExtension);
+                }
 
+                //-----------------------------------
+                // [既存ファイルチェック]
+                // 指定ファイル名から既存ファイルがあるかチェックし、存在する場合は上書き確認ダイアログを表示する
+                //-----------------------------------
+                // ディレクトリ、拡張子なしファイル名を抽出
+                string directory = Path.GetDirectoryName(filePath) ?? "";
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
+                // 新しいフォルダパスを生成（生成途中のファイルを保存するためのフォルダ）
+                string processFolderPath = Path.Combine(directory, fileNameWithoutExt + "_process");
+                //各過程のファイル名
+                string s設定パラメータ = "1" + fileNameWithoutExt + "_para" + sExtension;
+                string sXシフト加工1 = "2" + fileNameWithoutExt + "_shift1" + sExtension;
+                string sXシフト加工2 = "3" + fileNameWithoutExt + "_shift2" + sExtension;
+                string s単純マージ = "4" + fileNameWithoutExt + "_merge" + sExtension;
+                string sY座標ソート = "5" + fileNameWithoutExt + "_sort" + sExtension;
+                string s除去加工 = "6" + fileNameWithoutExt + "_exclusion" + sExtension;
+                string s重複処理 = "7" + fileNameWithoutExt + "_overlap" + sExtension;
+                string s抽出加工 = "8" + fileNameWithoutExt + "_extraction" + sExtension;
+                string sY座標昇降順 = "9" + fileNameWithoutExt + "_ysort" + sExtension;
+                string sY座標変換 = "10" + fileNameWithoutExt + "_coordinate" + sExtension;
+                string s出荷前 = "11" + fileNameWithoutExt + "_previous" + sExtension;
 
-                // 処理中オーバーレイを表示する
-                var progressOverlay = new ProgressOverlay(this);
-                progressOverlay.ShowOverlay();
-                    //-----------------------------------
-                    // [既存ファイルチェック]
-                    // 指定ファイル名から既存ファイルがあるかチェックし、存在する場合は上書き確認ダイアログを表示する
-                    //-----------------------------------
-                    // ディレクトリ、拡張子なしファイル名を抽出
-                    string directory = Path.GetDirectoryName(filePath) ?? "";
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
-                    // 新しいフォルダパスを生成
-                    string newFolderPath = Path.Combine(directory, fileNameWithoutExt);
-                    // フォルダが存在する場合、フォルダ内にこれから生成するファイル名と一致するものがないかチェックする
-                    if (!string.IsNullOrEmpty(newFolderPath))
+                // フォルダが存在する場合、フォルダ内にこれから生成するファイル名と一致するものがないかチェックする
+                if (!string.IsNullOrEmpty(processFolderPath))
+                {
+                    // 重複ファイルの存在チェック
+                    bool hasDuplicate = false;
+                    List<string> lstFilename = [s設定パラメータ,
+                                                sXシフト加工1,
+                                                sXシフト加工2,
+                                                s単純マージ,
+                                                sY座標ソート,
+                                                s除去加工,
+                                                s重複処理,
+                                                s抽出加工,
+                                                sY座標昇降順,
+                                                sY座標変換,
+                                                s出荷前];
+                    foreach (string fileName in lstFilename)
                     {
-                        // 重複ファイルの存在チェック
-                        bool hasDuplicate = false;
-                        List<string> lstFilename = [ "1"+fileNameWithoutExt + s設定パラメータ + sExtension,
-                                                 "2"+fileNameWithoutExt + sXシフト加工1 + sExtension,
-                                                 "3"+fileNameWithoutExt + sXシフト加工2 + sExtension,
-                                                 "4"+fileNameWithoutExt + s単純マージ + sExtension,
-                                                 "5"+fileNameWithoutExt + sY座標ソート + sExtension,
-                                                 "6"+fileNameWithoutExt + s除去加工 + sExtension,
-                                                 "7"+fileNameWithoutExt + s重複処理 + sExtension,
-                                                 "8"+fileNameWithoutExt + s抽出加工 + sExtension,
-                                                 "9"+fileNameWithoutExt + sY座標昇降順 + sExtension,
-                                                 "10"+fileNameWithoutExt + sY座標変換 + sExtension,
-                                                 "11"+fileNameWithoutExt + s出荷前 + sExtension];
-                        foreach (string fileName in lstFilename)
+                        // フォルダパスとリストのファイル名を結合
+                        string checkPath = Path.Combine(processFolderPath, fileName);
+                        // 1つでもファイルが存在すればフラグを立ててループを抜ける
+                        if (File.Exists(checkPath))
                         {
-                            // フォルダパスとリストのファイル名を結合
-                            string checkPath = Path.Combine(newFolderPath, fileName);
-                            // 1つでもファイルが存在すればフラグを立ててループを抜ける
-                            if (File.Exists(checkPath))
-                            {
-                                hasDuplicate = true;
-                                break;
-                            }
-                        }
-                        // 重複がある場合のみ確認ダイアログを表示
-                        if (hasDuplicate)
-                        {
-                            DialogResult result = MessageBox.Show("指定フォルダ内に同名のファイルが既に存在します。上書きしますか？\n（フォルダパス：" + newFolderPath + "）", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                            // 「いいえ」が押された場合は処理を抜ける
-                            if (result == DialogResult.No) { return; }
+                            hasDuplicate = true;
+                            break;
                         }
                     }
+                    // 重複がある場合のみ確認ダイアログを表示
+                    if (hasDuplicate)
+                    {
+                        DialogResult result = MessageBox.Show("指定フォルダ内に同名のファイルが既に存在します。上書きしますか？\n（フォルダパス：" + processFolderPath + "）", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        // 「いいえ」が押された場合は処理を抜ける
+                        if (result == DialogResult.No) { return; }
+                    }
+                }
 
 
-                    // 処理中オーバーレイを表示し、カーソルを待機状態にする
-                    Cursor.Current = Cursors.WaitCursor;
+                // 処理中オーバーレイを表示し、カーソルを待機状態にする
+                Cursor.Current = Cursors.WaitCursor;
+                try
+                {
+                    //-----------------------------------
+                    // [１．設定パラメータ保存]
+                    // 画面入力値をCSVファイルに出力する
+                    //-----------------------------------
                     try
                     {
-                        //-----------------------------------
-                        // [１．設定パラメータ保存]
-                        // 画面入力値をCSVファイルに出力する
-                        //-----------------------------------
-                        try
+                        // フォルダが存在しない場合は生成する
+                        if (!string.IsNullOrEmpty(processFolderPath))
                         {
+                            Directory.CreateDirectory(processFolderPath);
+                        }
                         // 設定パラメータ保存先ファイルのパス生成
-                        string filePath_para = AppendToFileName("1", filePath, s設定パラメータ);
+                        string filePath_para = Path.Combine(processFolderPath, s設定パラメータ);
                         // ファイルが既に存在し、かつロックされているかチェック
                         if (File.Exists(filePath_para) && IsFileLocked(filePath_para))
                         {
@@ -530,7 +533,7 @@ namespace iDefect
                     // 工程1のCSVファイル2列目（X座標）にXシフト量1を加算
                     //----------------------------------------------------
                     // Xシフト加工後保存先ファイルのパス生成
-                    string filePath_shift1 = AppendToFileName("2", filePath, sXシフト加工1);
+                    string filePath_shift1 = Path.Combine(processFolderPath, sXシフト加工1);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_shift1) && IsFileLocked(filePath_shift1))
                     {
@@ -599,7 +602,7 @@ namespace iDefect
                     // 工程2のCSVファイル2列目（X座標）にXシフト量2を加算
                     //----------------------------------------------------
                     // Xシフト加工後保存先ファイルのパス生成
-                    string filePath_shift2 = AppendToFileName("3", filePath, sXシフト加工2);
+                    string filePath_shift2 = Path.Combine(processFolderPath, sXシフト加工2);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_shift2) && IsFileLocked(filePath_shift2))
                     {
@@ -668,7 +671,7 @@ namespace iDefect
                     // 工程2で生成したファイルに工程1の明細を追記（工程1のヘッダ情報は使用しない）
                     //------------------------------------------------------------
                     // 単純マージ後保存先ファイルのパス生成
-                    string filePath_merge = AppendToFileName("4", filePath, s単純マージ);
+                    string filePath_merge = Path.Combine(processFolderPath, s単純マージ);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_merge) && IsFileLocked(filePath_merge))
                     {
@@ -715,7 +718,7 @@ namespace iDefect
                     // CSVファイル3列目（Y座標）をキーにして全行を昇順でソート
                     //---------------------------------------------------
                     // Xシフト加工後保存先ファイルのパス生成
-                    string filePath_sort = AppendToFileName("5", filePath, sY座標ソート);
+                    string filePath_sort = Path.Combine(processFolderPath, sY座標ソート);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_sort) && IsFileLocked(filePath_sort))
                     {
@@ -772,7 +775,7 @@ namespace iDefect
                     // chkDefectKind1～8のチェックされている値がCSVファイル4列目（欠点種類）に含まれる行を除去
                     //---------------------------------------------------
                     //除去加工後保存先ファイルのパス生成
-                    string filePath_exclusion = AppendToFileName("6", filePath, s除去加工);
+                    string filePath_exclusion = Path.Combine(processFolderPath, s除去加工);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_exclusion) && IsFileLocked(filePath_exclusion))
                     {
@@ -824,7 +827,7 @@ namespace iDefect
                     // CSVファイル2列目（X座標）1行上との差分と、3列目（Y座標）1行上との差分が画面で指定された値より小さい場合、該当行を削除
                     //---------------------------------------------------
                     // 重複処理後保存先ファイルのパス生成
-                    string filePath_overlap = AppendToFileName("7", filePath, s重複処理);
+                    string filePath_overlap = Path.Combine(processFolderPath, s重複処理);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_overlap) && IsFileLocked(filePath_overlap))
                     {
@@ -918,7 +921,7 @@ namespace iDefect
                     // CSVファイル1列目（2DC）を画面で指定された範囲で絞り込み
                     //---------------------------------------------------
                     // 抽出処理後保存先ファイルのパス生成
-                    string filePath_extraction = AppendToFileName("8", filePath, s抽出加工);
+                    string filePath_extraction = Path.Combine(processFolderPath, s抽出加工);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_extraction) && IsFileLocked(filePath_extraction))
                     {
@@ -962,7 +965,7 @@ namespace iDefect
                     // CSVファイル3列目（Y座標）をキーにして全行を画面で指定された順でソート
                     //---------------------------------------------------
                     // 昇降順指定後保存先ファイルのパス生成
-                    string filePath_ysort = AppendToFileName("9", filePath, sY座標昇降順);
+                    string filePath_ysort = Path.Combine(processFolderPath, sY座標昇降順);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_ysort) && IsFileLocked(filePath_ysort))
                     {
@@ -1030,7 +1033,7 @@ namespace iDefect
                     // CSVファイル3列目（Y座標）の値から小数点以下を抜き出し1000倍した値で上書きする
                     //---------------------------------------------------
                     // Y座標変換後保存先ファイルのパス生成
-                    string filePath_coordinate = AppendToFileName("10", filePath, sY座標変換);
+                    string filePath_coordinate = Path.Combine(processFolderPath, sY座標変換);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_coordinate) && IsFileLocked(filePath_coordinate))
                     {
@@ -1076,10 +1079,10 @@ namespace iDefect
                                 return;
                             }
 
-                            // 小数点以下を抽出して1000倍（例: 1.234 -> 234）
-                            int newValue = (int)Math.Round((val % 1.0m) * 1000);
-                            // 3列目の値を書き換え
-                            item.Columns[2] = newValue.ToString();
+                            // 小数点以下を抽出して1000倍（例: 1.234 -> 234, 1.2345 -> 234.5）
+                            decimal newValue = (val % 1.0m) * 1000;
+                            // 3列目の値を書き換え（末尾の不要なゼロを除去）
+                            item.Columns[2] = newValue.ToString("G");
                             // カンマで結合して1行に戻す
                             processedData.Add(string.Join(",", item.Columns));
                         }
@@ -1185,7 +1188,7 @@ namespace iDefect
                     // CSVファイル4列目以降のデータを削除（1列目～3列目だけを残す）
                     //---------------------------------------------------
                     // 出荷前保存先ファイルのパス生成
-                    string filePath_previous = AppendToFileName("11", filePath, s出荷前);
+                    string filePath_previous = Path.Combine(processFolderPath, s出荷前);
                     // ファイルが既に存在し、かつロックされているかチェック
                     if (File.Exists(filePath_previous) && IsFileLocked(filePath_previous))
                     {
@@ -1226,7 +1229,7 @@ namespace iDefect
                     // Readmeテキストファイル生成
                     //---------------------------------------------------
                     // 出力先のフォルダパスを指定
-                    string filePath_rm = Path.Combine(newFolderPath, "Readme.txt");
+                    string filePath_rm = Path.Combine(processFolderPath, "Readme.txt");
                     // 書き込む固定内容
                     string content = "加工途中のファイルを保存します。\n\n" +
                                      "１．　設定パラメータ：1出荷ファイル名＋_para.csv\n" +
@@ -1284,7 +1287,6 @@ namespace iDefect
                 {
                     this.UseWaitCursor = false;
                     Cursor.Current = Cursors.Default;
-                    progressOverlay.CloseOverlay();
                 }
 
                 // 処理完了のメッセージを表示
@@ -1482,37 +1484,6 @@ namespace iDefect
                 value = "\"" + value.Replace("\"", "\"\"") + "\"";
             }
             sw.WriteLine($"{key},{value},{unit}");
-        }
-
-        /// <summary>
-        /// ファイル名からフォルダを生成しファイル名にサフィックスを追加
-        /// </summary>
-        /// <param name="fileNo">ファイル名の先頭に付ける番号</param>
-        /// <param name="filePath">元のファイルパス</param>
-        /// <param name="suffix">追加するサフィックス</param>
-        /// <returns>元のファイルパスと同階層にファイル名と同じ名称のフォルダを作成し、そのフォルダ内にサフィックスを追加した新しいファイルのパスを返します</returns>
-        /// <exception cref="ArgumentException"></exception>
-        private static string AppendToFileName(string fileNo, string filePath, string suffix)
-        {
-            // ディレクトリ、拡張子なしファイル名、拡張子を抽出
-            string directory = Path.GetDirectoryName(filePath) ?? "";
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
-            string extension = Path.GetExtension(filePath);
-
-            // 新しいファイル名を構築
-            string newFileName = $"{fileNo}{fileNameWithoutExt}{suffix}{extension}";
-
-            // 新しいフォルダパスを生成
-            string newFolderPath = Path.Combine(directory, fileNameWithoutExt);
-
-            // フォルダが存在しない場合は自動生成する（存在する場合は何もしない）
-            if (!string.IsNullOrEmpty(newFolderPath))
-            {
-                Directory.CreateDirectory(newFolderPath);
-            }
-
-            // パスを再結合
-            return Path.Combine(newFolderPath, newFileName);
         }
 
         /// <summary>
