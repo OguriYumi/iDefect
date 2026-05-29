@@ -1075,14 +1075,14 @@ namespace iDefect
                             // 3列目（Y座標）が数値であるか確認
                             if (!decimal.TryParse(item.Columns[2], out decimal val))
                             {
-                                MessageBox.Show($"[Y座標変換]\n{item.Index}行目のY座標（3列目）が数値ではありません（値: {item.Columns[2]}）。\nCSVファイルの形式をご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show($"[Y座標変換]\n{item.Index}行目のY座標（3列目）が数値ではありません（値: {item.Columns[2].Trim()}）。\nCSVファイルの形式をご確認ください。\n処理を中断します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return;
                             }
 
                             // 小数点以下を抽出して1000倍（例: 1.234 -> 234, 1.2345 -> 234.5）
                             decimal newValue = (val % 1.0m) * 1000;
                             // 3列目の値を書き換え（末尾の不要なゼロを除去）
-                            item.Columns[2] = newValue.ToString("G");
+                            item.Columns[2] = newValue.ToString("G29");
                             // カンマで結合して1行に戻す
                             processedData.Add(string.Join(",", item.Columns));
                         }
